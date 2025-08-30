@@ -1,0 +1,23 @@
+{
+  "name": "foodtech-delivery-agent-factory",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "workspaces": [
+    "apps/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev:web": "pnpm --filter @foodtech/web dev",
+    "build:web": "pnpm --filter @foodtech/web build",
+    "dev:mobile": "pnpm --filter @foodtech/mobile start",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "db:generate": "pnpm --filter @foodtech/web prisma generate",
+    "db:migrate": "pnpm --filter @foodtech/web prisma migrate dev",
+    "format": "pnpm -r format"
+  }
+}

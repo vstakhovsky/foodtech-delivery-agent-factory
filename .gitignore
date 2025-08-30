@@ -1,0 +1,22 @@
+# Node / JS
+node_modules
+npm-debug.log*
+pnpm-lock.yaml
+yarn.lock
+dist
+.next
+.expo
+.expo-shared
+android
+ios
+build
+coverage
+.env*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code temp
+.claude/.history
