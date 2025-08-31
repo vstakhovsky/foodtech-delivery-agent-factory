@@ -1,0 +1,84 @@
+# =========================================================
+# .aider.conf.yml  — Project-wide Aider configuration
+# Location: foodtech-delivery-agent-factory/.aider.conf.yml
+# Purpose: Safe defaults for collaborative, incremental edits
+# =========================================================
+#
+# Notes:
+# - Do NOT put API keys here. Aider reads them from env vars:
+#   - OPENAI_API_KEY (for OpenAI models)
+#   - ANTHROPIC_API_KEY (if you later enable Anthropic)
+# - Start with the “safe baseline” below. Optional settings
+#   are commented out — you can enable them gradually if your
+#   Aider version supports them.
+
+# -----------------------
+# SAFE BASELINE
+# -----------------------
+
+# Primary model used by Aider for code editing.
+model: gpt-4o
+
+# Make small, readable git commits automatically as changes are applied.
+auto-commits: true
+
+# Directories/files Aider should prioritize when adding to context.
+files:
+  - apps/web
+  - apps/mobile
+  - services
+  - db
+  - .github/workflows
+  - README.md
+
+# Protect important or generated files from being edited.
+# Aider can read them but won’t rewrite them unless you remove them from this list.
+read-only:
+  # lockfiles
+  - package-lock.json
+  - pnpm-lock.yaml
+  - yarn.lock
+  - apps/web/package-lock.json
+  - apps/web/pnpm-lock.yaml
+  - apps/mobile/package-lock.json
+  - apps/mobile/pnpm-lock.yaml
+
+  # built or platform-managed assets
+  - apps/web/public/**
+  - apps/mobile/ios/**
+  - apps/mobile/android/**
+
+  # CI pipeline definition
+  - .github/workflows/ci.yml
+
+# -----------------------
+# OPTIONAL / ADVANCED (uncomment only if supported by your Aider version)
+# -----------------------
+
+# A lighter/cheaper model for quick lookups and summaries:
+# weak-model: gpt-4o-mini
+
+# Make outputs slightly more deterministic:
+# temperature: 0.2
+
+# A project-wide system prompt to shape Aider’s behavior:
+# system-prompt: |
+#   You are a precise senior-level code assistant working in a JS/TS monorepo
+#   (Next.js web + Expo mobile + Prisma + CI). Prefer minimal, safe diffs.
+#   Use Conventional Commits (e.g., feat(web): …, fix(mobile): …, chore(ci): …).
+#   Never hardcode secrets; rely on environment variables and .env files (do not commit them).
+#   For Prisma changes: update schema, generate client, create and apply a migration,
+#   and commit both the schema and migrations.
+
+# If your Aider build supports token controls:
+# max-tokens: 4000
+# map-tokens: 8000
+
+# Auto-add newly created files to the editing context:
+# auto-add: true
+
+# Create feature branches automatically (if supported):
+# branch: "aider/{{date}}"
+
+# Use a custom commit message template (if supported):
+# commit-template: "feat({{scope}}): {{message}}"
