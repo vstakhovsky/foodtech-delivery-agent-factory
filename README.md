@@ -1,9 +1,15 @@
 # FoodTech Delivery — AI Agent Factory + Claude Code Subagents
 
-**RU 🇷🇺** — Репозиторий для веб и мобильного приложения доставки еды (DoorDash/UberEats‑style), реализуемого через **AI Agent Factory** + **Claude Code Subagents**.  
-**EN 🇬🇧** — Repository for a DoorDash/UberEats‑style food delivery web & mobile app built with **AI Agent Factory** + **Claude Code Subagents**.
+
+**Repository for a DoorDash/UberEats‑style food delivery web & mobile app built with **AI Agent Factory** + **Claude Code Subagents**.
 
 ## Monorepo layout
+
+# FoodTech Delivery Agent Factory
+
+[![CI](https://github.com/vstakhovsky/foodtech-delivery-agent-factory/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vstakhovsky/foodtech-delivery-agent-factory/actions/workflows/ci.yml)
+
+
 ```
 apps/
   web/         # Next.js 15 App Router web client
