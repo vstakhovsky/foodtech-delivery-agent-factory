@@ -1,13 +1,14 @@
 # FoodTech Delivery — AI Agent Factory + Claude Code Subagents
 
+**Repository for a DoorDash/UberEats-style food delivery web & mobile app built with AI Agent Factory + Claude Code Subagents.**
 
-**Repository for a DoorDash/UberEats‑style food delivery web & mobile app built with **AI Agent Factory** + **Claude Code Subagents**.
-
-## Monorepo layout
-
-# FoodTech Delivery Agent Factory
+## Status
 
 [![CI](https://github.com/vstakhovsky/foodtech-delivery-agent-factory/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vstakhovsky/foodtech-delivery-agent-factory/actions/workflows/ci.yml)
+[![Open Actions](https://img.shields.io/badge/GitHub-Actions-blue?logo=githubactions)](https://github.com/vstakhovsky/foodtech-delivery-agent-factory/actions)
+[![Repo](https://img.shields.io/badge/Repo-foodtech--delivery--agent--factory-24292e?logo=github)](https://github.com/vstakhovsky/foodtech-delivery-agent-factory)
+
+## Monorepo layout
 
 
 ```
