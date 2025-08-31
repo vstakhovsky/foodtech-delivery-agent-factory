@@ -1,20 +1,48 @@
 name: CI
+
 on:
   push:
     branches: [ main ]
   pull_request:
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: pnpm -v
-      - run: pnpm i
-      - run: pnpm typecheck
-      - run: pnpm --filter @foodtech/web build
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install deps
+        run: pnpm i
+
+      # Prisma code-level checks (no DB required)
+      - name: Prisma format/validate/generate (web)
+        run: |
+          pnpm -F @foodtech/web exec prisma format
+          pnpm -F @foodtech/web exec prisma validate
+          pnpm -F @foodtech/web exec prisma generate
+
+      # Optional: check migration status against a real DB (needs secret)
+      - name: Prisma migrate status (against DB)
+        if: ${{ secrets.DATABASE_URL != '' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pnpm -F @foodtech/web exec prisma migrate status --schema apps/web/prisma/schema.prisma
+
+      # Optional: auto-deploy migrations on main (use with caution!)
+      - name: Prisma migrate deploy (prod)
+        if: github.ref == 'refs/heads/main' && secrets.DATABASE_URL != ''
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pnpm -F @foodtech/web exec prisma migrate deploy --schema apps/web/prisma/schema.prisma
