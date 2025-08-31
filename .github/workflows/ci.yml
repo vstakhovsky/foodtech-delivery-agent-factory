@@ -10,39 +10,38 @@ jobs:
   web:
     runs-on: ubuntu-latest
 
-    # По умолчанию все команды ниже выполняем в apps/web
+    # Все команды по-умолчанию выполняем в папке web-приложения
     defaults:
       run:
-        shell: bash
         working-directory: apps/web
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node 20 (with pnpm cache)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-          # если lock лежит в apps/web — укажи его для cache:
+          # если добавите lock-файл, лучше укажите на него путь (иначе можно оставить так)
           cache-dependency-path: apps/web/pnpm-lock.yaml
 
-      # Включаем pnpm через Corepack, чтобы не конфликтовать с packageManager
-      - name: Enable pnpm via Corepack
-        working-directory: .
+      # ВАЖНО: ставим pnpm через официальный экшен, НО БЕЗ указания version —
+      # тогда экшен возьмёт версию из package.json (ключ "packageManager")
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Show versions
         run: |
-          corepack enable
-          # Можно жёстко зафиксировать версию, чтобы избегать сюрпризов
-          corepack prepare pnpm@9.0.0 --activate
+          node -v
           pnpm -v
 
       - name: Install deps
+        # пока можно без lock-файла; когда появится pnpm-lock.yaml — добавим --frozen-lockfile
         run: pnpm install
-
-      - name: Generate Prisma client
-        # если нет Prisma — этот шаг можно убрать
-        run: pnpm db:generate
 
       - name: Lint
         run: pnpm lint
@@ -52,3 +51,4 @@ jobs:
 
       - name: Build
         run: pnpm build
+
