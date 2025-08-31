@@ -10,7 +10,7 @@ jobs:
   web:
     runs-on: ubuntu-latest
 
-    # Все команды по-умолчанию выполняем в папке web-приложения
+    # Все команды "run:" ниже выполняем из apps/web
     defaults:
       run:
         working-directory: apps/web
@@ -19,28 +19,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node 20 (with pnpm cache)
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-          # если добавите lock-файл, лучше укажите на него путь (иначе можно оставить так)
+          # если файла apps/web/pnpm-lock.yaml нет — просто удалите эту строку
           cache-dependency-path: apps/web/pnpm-lock.yaml
 
-      # ВАЖНО: ставим pnpm через официальный экшен, НО БЕЗ указания version —
-      # тогда экшен возьмёт версию из package.json (ключ "packageManager")
+      # 1) Включаем corepack, чтобы он мог активировать pnpm из "packageManager"
+      - name: Enable corepack
+        run: corepack enable
+
+      # 2) Официальный экшен для pnpm (без указания version, чтобы не конфликтовать
+      #    с packageManager в package.json — если он там есть)
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           run_install: false
 
-      - name: Show versions
+      # 3) Fallback: если pnpm всё еще не в PATH, ставим глобально через npm
+      - name: Ensure pnpm is available
         run: |
-          node -v
-          pnpm -v
+          if ! command -v pnpm >/dev/null 2>&1; then
+            echo "pnpm not found in PATH; installing via npm…"
+            npm i -g pnpm@9
+          fi
+          echo "pnpm version: $(pnpm -v)"
 
       - name: Install deps
-        # пока можно без lock-файла; когда появится pnpm-lock.yaml — добавим --frozen-lockfile
         run: pnpm install
 
       - name: Lint
@@ -51,4 +58,5 @@ jobs:
 
       - name: Build
         run: pnpm build
+
 
