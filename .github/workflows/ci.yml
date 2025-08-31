@@ -2,13 +2,17 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
-  build:
+  web:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,22 +21,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
+      - name: Enable pnpm via Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@9 --activate
+          pnpm -v
 
       - name: Install deps
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
-      - name: Lint (@foodtech/web)
-        run: pnpm -F @foodtech/web lint
+      - name: Lint
+        run: pnpm lint
 
-      - name: Typecheck (@foodtech/web)
-        run: pnpm -F @foodtech/web typecheck
+      - name: Typecheck
+        run: pnpm typecheck
 
-      - name: Build (@foodtech/web)
-        run: pnpm -F @foodtech/web build
+      - name: Build
+        run: pnpm build
+
 
