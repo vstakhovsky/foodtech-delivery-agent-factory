@@ -10,37 +10,45 @@ jobs:
   web:
     runs-on: ubuntu-latest
 
+    # По умолчанию все команды ниже выполняем в apps/web
+    defaults:
+      run:
+        shell: bash
+        working-directory: apps/web
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Node 20 + кеш под pnpm
-      - name: Setup Node
+      - name: Setup Node 20 (with pnpm cache)
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: pnpm
+          # если lock лежит в apps/web — укажи его для cache:
+          cache-dependency-path: apps/web/pnpm-lock.yaml
 
-      # Устанавливаем pnpm 9 (совместимо с "packageManager": "pnpm@9.x", если он есть в корне)
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
+      # Включаем pnpm через Corepack, чтобы не конфликтовать с packageManager
+      - name: Enable pnpm via Corepack
+        working-directory: .
+        run: |
+          corepack enable
+          # Можно жёстко зафиксировать версию, чтобы избегать сюрпризов
+          corepack prepare pnpm@9.0.0 --activate
+          pnpm -v
 
-      # Установка зависимостей всего монорепо (если есть pnpm-workspace.yaml)
       - name: Install deps
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
-      # Линт, типчек и билд только для веб-пакета через filter
+      - name: Generate Prisma client
+        # если нет Prisma — этот шаг можно убрать
+        run: pnpm db:generate
+
       - name: Lint
-        run: pnpm -F @foodtech/web lint
+        run: pnpm lint
 
       - name: Typecheck
-        run: pnpm -F @foodtech/web typecheck
+        run: pnpm typecheck
 
       - name: Build
-        env:
-          CI: "true"
-        run: pnpm -F @foodtech/web build
-
+        run: pnpm build
