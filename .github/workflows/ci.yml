@@ -2,43 +2,51 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
   web:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web
-
+    
     steps:
-      - uses: actions/checkout@v4
-
-      # Устанавливаем pnpm
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          # ЛИБО укажи версию (и тогда нигде в package.json не должно быть "packageManager")
-          version: 9
+          version: 8
           run_install: false
-
-      - name: Setup Node 20 (with pnpm cache)
-        uses: actions/setup-node@v4
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
         with:
-          node-version: 20
-          cache: pnpm
-          cache-dependency-path: apps/web/pnpm-lock.yaml
-
-      - name: Install deps
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Typecheck
-        run: pnpm tsc -p tsconfig.json --noEmit
-
-      - name: Lint
-        run: pnpm eslint .
-
-      - name: Build
+      
+      - name: Build project
         run: pnpm build
+      
+      - name: Run tests
+        run: pnpm test
+      
+      - name: Run linting
+        run: pnpm lint
