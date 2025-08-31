@@ -2,42 +2,38 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      # Fake URL so anything that inspects env won't fail (we DO NOT run migrations in CI)
-      DATABASE_URL: "postgresql://user:pass@localhost:5432/postgres"
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      # Берём PNPM из package.json -> packageManager (без указания version!)
+      - uses: pnpm/action-setup@v4
         with:
-          version: 9
           run_install: false
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      # Node 20. Кэш PNPM включай только если lockfile закоммичен (см. блок B)
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          # DO NOT use 'cache: pnpm' here because there is no pnpm-lock.yaml in the repo root
+          # cache: pnpm
+          # cache-dependency-path: pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm i --no-frozen-lockfile
-
-      - name: Show versions (debug)
+      - name: Show versions
         run: |
           node -v
           pnpm -v
 
+      - name: Install deps
+        run: pnpm install
+
       - name: Typecheck
-        run: pnpm typecheck
+        run: pnpm -F @foodtech/web typecheck
 
       - name: Build web
-        run: pnpm --filter @foodtech/web build
+        run: pnpm -F @foodtech/web build
