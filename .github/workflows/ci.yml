@@ -2,38 +2,57 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # Берём PNPM из package.json -> packageManager (без указания version!)
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      # Node 20. Кэш PNPM включай только если lockfile закоммичен (см. блок B)
-      - uses: actions/setup-node@v4
+      # Node + Corepack (pnpm берётся из packageManager, конфликта версий не будет)
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          # cache: pnpm
-          # cache-dependency-path: pnpm-lock.yaml
+          cache: 'pnpm'
 
-      - name: Show versions
+      - name: Enable Corepack (pnpm)
         run: |
-          node -v
+          corepack enable
+          # при желании можно зафиксировать мажор: corepack prepare pnpm@^9 --activate
           pnpm -v
 
-      - name: Install deps
-        run: pnpm install
+      # Установка зависимостей по всем пакетам монорепы
+      - name: Install deps (pnpm -r)
+        run: pnpm -r install --frozen-lockfile
+
+      # Готовим .env для веб-приложения и прокидываем секретный DATABASE_URL
+      - name: Prepare .env for web
+        working-directory: apps/web
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          # если у вас есть docs/ENV.sample — можно подмержить значения:
+          if [ -f ../../docs/ENV.sample ]; then
+            cp -n ../../docs/ENV.sample .env || true
+          fi
+          echo "DATABASE_URL=$DATABASE_URL" >> .env
+          echo "NEXT_TELEMETRY_DISABLED=1" >> .env
+
+      # Prisma generate (требует только наличие переменной, к базе подключаться не будет)
+      - name: Prisma generate
+        run: pnpm -F @foodtech/web db:generate
 
       - name: Typecheck
         run: pnpm -F @foodtech/web typecheck
+
+      - name: Lint
+        run: pnpm -F @foodtech/web lint
 
       - name: Build web
         run: pnpm -F @foodtech/web build
