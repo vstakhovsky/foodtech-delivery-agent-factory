@@ -1,31 +1,46 @@
-{
-  "name": "@foodtech/web",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "db:migrate": "prisma migrate dev --schema prisma/schema.prisma",
-    "db:generate": "prisma generate --schema prisma/schema.prisma",
-    "db:seed": "pnpm dlx tsx prisma/seed.ts"
-  },
-  "dependencies": {
-    "next": "14.2.5",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
-  },
-  "devDependencies": {
-    "typescript": "5.6.3",
-    "@types/react": "18.2.66",
-    "@types/node": "20.12.12",
-    "eslint": "8.57.0",
-    "postcss": "8.4.33",
-    "autoprefixer": "10.4.18",
-    "tailwindcss": "3.4.9",
-    "prisma": "6.0.1",
-    "tsx": "4.19.1"
-  }
-}
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Node 20 + кеш под pnpm
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      # Устанавливаем pnpm 9 (совместимо с "packageManager": "pnpm@9.x", если он есть в корне)
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      # Установка зависимостей всего монорепо (если есть pnpm-workspace.yaml)
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # Линт, типчек и билд только для веб-пакета через filter
+      - name: Lint
+        run: pnpm -F @foodtech/web lint
+
+      - name: Typecheck
+        run: pnpm -F @foodtech/web typecheck
+
+      - name: Build
+        env:
+          CI: "true"
+        run: pnpm -F @foodtech/web build
+
