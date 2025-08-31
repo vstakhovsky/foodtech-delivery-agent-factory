@@ -1,10 +1,8 @@
 name: CI
-
 on:
   push:
     branches: [ main ]
   pull_request:
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,17 +10,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          run_install: false  # rely on package.json's packageManager
+          run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
+          node-version: 20
+          cache: pnpm
       - run: pnpm -v
       - run: pnpm i
       - run: pnpm typecheck
       - run: pnpm --filter @foodtech/web build
-
-      - uses: actions/setup-node@v4
-  with:
-    node-version: "20"
-    # cache: "pnpm"  # remove this line
