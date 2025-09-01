@@ -35,8 +35,8 @@ files:
 # Aider can read them but won’t rewrite them unless you remove them from this list.
 read-only:
   # lockfiles
-  - package-lock.json
-  - pnpm-lock.yaml
+  - "apps/**/package-lock.json"
+  - "apps/**/pnpm-lock.yaml"
   - yarn.lock
   - apps/web/package-lock.json
   - apps/web/pnpm-lock.yaml
@@ -44,9 +44,9 @@ read-only:
   - apps/mobile/pnpm-lock.yaml
 
   # built or platform-managed assets
-  - apps/web/public/**
-  - apps/mobile/ios/**
-  - apps/mobile/android/**
+  - "apps/web/public/**"
+  - "apps/mobile/ios/**"
+  - "apps/mobile/android/**"
 
   # CI pipeline definition
   - .github/workflows/ci.yml
