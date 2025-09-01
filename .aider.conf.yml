@@ -24,12 +24,12 @@ auto-commits: true
 
 # Directories/files Aider should prioritize when adding to context.
 files:
-  - apps/web
-  - apps/mobile
-  - services
-  - db
-  - .github/workflows
-  - README.md
+  - "apps/web"
+  - "apps/mobile"
+  - "services"
+  - "db"
+  - ".github/workflows"
+  - "README.md"
 
 # Protect important or generated files from being edited.
 # Aider can read them but won’t rewrite them unless you remove them from this list.
