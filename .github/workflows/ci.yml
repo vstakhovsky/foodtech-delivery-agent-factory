@@ -2,13 +2,14 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   web:
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: apps/web
@@ -16,19 +17,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup pnpm 8 (via corepack)
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: false
+
+      - name: Setup Node.js 20 and enable pnpm cache
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
           cache-dependency-path: apps/web/pnpm-lock.yaml
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
-
-      - name: Install dependencies
+      - name: Install deps
         run: pnpm install --frozen-lockfile
 
       - name: Lint
